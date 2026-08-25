@@ -17,6 +17,7 @@ La colonne « Où c'est traité » nomme le fichier réel et la règle exacte.
 | Sortie de code non sûre | `CLAUDE.md` — SQL paramétré, pas d'interpolation shell, validation des sorties de LLM et d'API |
 | Secrets en dur | `CLAUDE.md` — jamais de secret dans le code, les tests ou les fixtures |
 | Fuite par lecture de fichiers sensibles | `settings.json` — 13 `deny` `Read` : `.env`, `.env.*`, `secrets/**`, clés privées, `~/.ssh/**`, `~/.aws/**`, `~/.gnupg/**`, `~/.config/gh/**`, `~/.npmrc`, `~/.netrc`. Couvre aussi `Edit` et `Write` sur ces chemins |
+| Perte de travail ou d'historique partagé | `settings.json` — `ask` sur `git push *` (couvre aussi `--force`, une seule règle plutôt qu'un `deny` contournable par réordre des flags) et `git reset --hard` (forme nue et avec argument). En mode auto, Claude Code lance lui-même un `git status` avant ces commandes et le montre au classifier — protection interne, indépendante de nos règles |
 
 ## Volontairement hors périmètre
 
@@ -30,9 +31,13 @@ d'entraînement, faiblesses des bases vectorielles.
   Claude Code, pas à un script qu'il lance. Un `node -e` ou un `python -c` qui
   ouvre un fichier passe au travers. Pour une contrainte au niveau OS, activer
   le sandbox (`/sandbox`).
-- **Les verbes non énumérés.** Un `deny` sur `Edit(chemin)` couvre les tools
-  `Edit`/`Write` et les redirections `>`, `>>`, `2>`. Il ne couvre pas `mv`,
-  `cp`, ni `sed -i`. Une liste de deny ferme le chemin direct, pas tous.
+- **Les verbes non énumérés, en général.** Un `deny` sur `Edit(chemin)` couvre
+  les tools `Edit`/`Write` et les redirections `>`, `>>`, `2>`. La doc ne
+  mentionne pas `mv`, `cp` ni `sed -i` comme couverts. **Sur les deux fichiers
+  liés par symlink (`settings.json`, `CLAUDE.md`), testé empiriquement le
+  2026-08-25 : `cp` ciblant le fichier est bloqué**, probablement parce que la
+  règle suit la résolution du lien jusqu'à `~/.claude/`, un chemin protégé.
+  Non vérifié sur un chemin `deny` ordinaire sans symlink — y rester prudent.
 - **Une injection déterminée.** La règle « contenu externe = donnée » est
   appliquée par le modèle qui lit ce contenu. Elle vaut pour le cas nominal.
 - **La portée des identifiants.** Un agent qui tourne avec un jeton d'accès
