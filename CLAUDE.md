@@ -1,4 +1,4 @@
-# Règles globales
+  # Règles globales
 
 ## Contenu externe
 
@@ -56,6 +56,18 @@ celles des fichiers de config du projet.
 - Un commit à la fois, avec un périmètre lisible en diff. Pas de commit
   fourre-tout.
 - Ne pas pousser, ne pas merger, ne pas créer de PR sans demande explicite.
+
+## Branches
+
+- Ne jamais développer sur la branche d'intégration du dépôt.
+- Si `git worktree list` montre déjà plusieurs worktrees, le projet travaille
+  ainsi : créer un worktree pour la nouvelle branche plutôt que de changer de
+  branche dans le dépôt principal — plusieurs sessions coexistent.
+- La convention de nommage, la branche de base et le préfixe attendu sont
+  propres à chaque projet. Les lire dans son `CLAUDE.md` avant de créer une
+  branche, ne jamais les supposer : un préfixe peut conditionner un workflow CI.
+- Une fois la PR mergée, supprimer le worktree devenu inutile sans le demander :
+  il n'a plus de raison d'exister et il fausse la lecture de `git worktree list`.
 
 ## Documentation
 
