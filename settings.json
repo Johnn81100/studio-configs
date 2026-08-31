@@ -4,7 +4,28 @@
   },
   "includeCoAuthoredBy": false,
   "permissions": {
-    "defaultMode": "auto",
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm test*)",
+      "Bash(npm start*)",
+      "Bash(npm ls*)",
+      "Bash(npm outdated*)",
+      "mcp__plugin_github_github__get_me",
+      "mcp__plugin_github_github__create_repository",
+      "mcp__plugin_github_github__list_commits",
+      "WebFetch",
+      "Bash(docker ps*)",
+      "Bash(docker images*)",
+      "Bash(docker image ls*)",
+      "Bash(docker volume ls*)",
+      "Bash(docker network ls*)",
+      "Bash(docker logs *)",
+      "Bash(docker inspect *)",
+      "Bash(docker system df*)",
+      "Bash(docker version)",
+      "Bash(docker info)",
+      "Bash(docker builder prune:*)"
+    ],
     "deny": [
       "Read(.env)",
       "Read(.env.*)",
@@ -53,29 +74,25 @@
       "Bash(docker system prune*)",
       "Bash(docker network rm *)"
     ],
-    "allow": [
-      "Bash(npm run *)",
-      "Bash(npm test*)",
-      "Bash(npm start*)",
-      "Bash(npm ls*)",
-      "Bash(npm outdated*)",
-      "mcp__plugin_github_github__get_me",
-      "mcp__plugin_github_github__create_repository",
-      "mcp__plugin_github_github__list_commits",
-      "WebFetch",
-      "Bash(docker ps*)",
-      "Bash(docker images*)",
-      "Bash(docker image ls*)",
-      "Bash(docker volume ls*)",
-      "Bash(docker network ls*)",
-      "Bash(docker logs *)",
-      "Bash(docker inspect *)",
-      "Bash(docker system df*)",
-      "Bash(docker version)",
-      "Bash(docker info)",
-      "Bash(docker builder prune:*)"
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "timeout": 10,
+            "statusMessage": "Verification config protegee",
+            "command": "c=$(cat); printf '%s' \"$c\" | grep -Eq 'studio-configs[\\\\/]+(CLAUDE\\.md|settings\\.json)|\\.claude[\\\\/]+(CLAUDE\\.md|settings(\\.local)?\\.json)' || exit 0; c=$(printf '%s' \"$c\" | sed -E 's#2?>&?[0-9]*[[:space:]]*/dev/null##g'); printf '%s' \"$c\" | grep -Eq '(>|\\btee\\b|\\bmv\\b|\\bcp\\b|\\brm\\b|\\bdd\\b|\\btruncate\\b|\\binstall\\b|\\bpython3?\\b|\\bnode\\b|\\bperl\\b|sed +-i)' || exit 0; printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Config protegee : ce fichier est deja en deny pour Edit. Y ecrire via Bash contournerait la regle. Presenter la modification a l utilisateur pour qu il l applique lui-meme.\"}}'"
+          }
+        ]
+      }
     ]
   },
+  "model": "opus",
   "enableAllProjectMcpServers": false,
   "enabledMcpjsonServers": [],
   "enabledPlugins": {
@@ -89,5 +106,5 @@
   },
   "tui": "fullscreen",
   "voiceEnabled": true,
-  "model": "opus"
+  "agentPushNotifEnabled": true
 }
