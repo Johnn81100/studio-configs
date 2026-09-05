@@ -74,8 +74,11 @@
       "Bash(docker system prune*)",
       "Bash(docker network rm *)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "acceptEdits"
   },
+  "model": "opus",
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
   "hooks": {
     "PreToolUse": [
       {
@@ -83,28 +86,38 @@
         "hooks": [
           {
             "type": "command",
+            "command": "c=$(cat); printf '%s' \"$c\" | grep -Eq 'studio-configs[\\\\/]+(CLAUDE\\.md|settings\\.json)|\\.claude[\\\\/]+(CLAUDE\\.md|settings(\\.local)?\\.json)' || exit 0; c=$(printf '%s' \"$c\" | sed -E 's#2?>&?[0-9]*[[:space:]]*/dev/null##g'); printf '%s' \"$c\" | grep -Eq '(>|\\btee\\b|\\bmv\\b|\\bcp\\b|\\brm\\b|\\bdd\\b|\\btruncate\\b|\\binstall\\b|\\bpython3?\\b|\\bnode\\b|\\bperl\\b|sed +-i)' || exit 0; printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Config protegee : ce fichier est deja en deny pour Edit. Y ecrire via Bash contournerait la regle. Presenter la modification a l utilisateur pour qu il l applique lui-meme.\"}}'",
             "shell": "bash",
             "timeout": 10,
-            "statusMessage": "Verification config protegee",
-            "command": "c=$(cat); printf '%s' \"$c\" | grep -Eq 'studio-configs[\\\\/]+(CLAUDE\\.md|settings\\.json)|\\.claude[\\\\/]+(CLAUDE\\.md|settings(\\.local)?\\.json)' || exit 0; c=$(printf '%s' \"$c\" | sed -E 's#2?>&?[0-9]*[[:space:]]*/dev/null##g'); printf '%s' \"$c\" | grep -Eq '(>|\\btee\\b|\\bmv\\b|\\bcp\\b|\\brm\\b|\\bdd\\b|\\btruncate\\b|\\binstall\\b|\\bpython3?\\b|\\bnode\\b|\\bperl\\b|sed +-i)' || exit 0; printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Config protegee : ce fichier est deja en deny pour Edit. Y ecrire via Bash contournerait la regle. Presenter la modification a l utilisateur pour qu il l applique lui-meme.\"}}'"
+            "statusMessage": "Verification config protegee"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "c=$(cat); printf '%s' \"$c\" | jq -r '.tool_input.content // .tool_input.new_string // \"\"' | grep -q '\u2014' && printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Tiret cadratin interdit. Remplacer selon le role reel dans la phrase : deux-points s il introduit, virgule s il oppose, parentheses s il incise, point si la phrase peut se couper. Ne pas substituer mecaniquement.\"}}'; exit 0",
+            "shell": "bash",
+            "timeout": 10,
+            "statusMessage": "Verification tiret cadratin"
           }
         ]
       }
     ]
   },
-  "model": "opus",
-  "enableAllProjectMcpServers": false,
-  "enabledMcpjsonServers": [],
   "enabledPlugins": {
     "github@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "vercel@claude-plugins-official": true,
-    "figma@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
+    "vercel@claude-plugins-official": false,
+    "figma@claude-plugins-official": false,
     "playwright@claude-plugins-official": true
   },
   "tui": "fullscreen",
+  "agentPushNotifEnabled": true,
   "voiceEnabled": true,
-  "agentPushNotifEnabled": true
+  "remoteControlAtStartup": true
 }
