@@ -45,8 +45,8 @@ git commit        # le geste délibéré
 
 Si cette habitude se perd, il ne reste rien entre une modification et son effet.
 Les règles `deny` sur `settings.json` et `CLAUDE.md` empêchent que je les écrive
-directement — le travail passe par un brouillon (`settings.fusion.json`), la
-promotion est manuelle.
+directement : le travail passe par un brouillon (`settings.draft.json`,
+`CLAUDE.draft.md`), la promotion est manuelle.
 
 ## Lire le settings.json
 
@@ -71,6 +71,33 @@ pattern `/chemin` se résout sur `~/.claude/chemin`. D'où l'usage exclusif de
 
 Le mode auto retire par ailleurs les règles `allow` larges accordant de
 l'exécution arbitraire — dont `Bash(npm run *)` — et les restaure à la sortie.
+
+## Les hooks
+
+`settings.json` porte deux hooks `PreToolUse`. Ils appliquent au même titre
+qu'une règle de permission : ils s'exécutent avant l'outil et peuvent l'annuler.
+Leur différence est qu'ils voient le **contenu** de l'appel, pas seulement le nom
+de l'outil et le chemin.
+
+| Matcher | Ce qu'il refuse | Pourquoi |
+|---|---|---|
+| `Bash` | Écrire dans une config protégée par un détour shell | Les règles `deny` ne couvrent qu'`Edit`. Sans ce hook, un `cat > settings.json` passerait sous la barrière. |
+| `Write` | Un contenu portant un tiret cadratin | La règle de ponctuation du `CLAUDE.md` n'est qu'un panneau. Ce hook la rend appliquée. |
+
+Deux limites connues, constatées à l'usage :
+
+**Le hook `Write` ne distingue pas un tiret produit d'un tiret transporté.**
+Recopier un fichier existant qui en contient est refusé, alors que rien de neuf
+n'est écrit. Le remède est de traiter le cas au moment où il se pose, pas de
+désarmer le hook.
+
+**Il ne couvre pas `Edit`.** Étendre le matcher rendrait toute retouche
+impossible dans un fichier déjà riche en tirets cadratins, et obligerait à
+nettoyer l'existant pour avancer.
+
+Dans le JSON, le caractère recherché est écrit sous sa forme échappée Unicode
+plutôt qu'en clair : le fichier reste ainsi conforme à la règle qu'il applique.
+Le parseur JSON la décode avant de passer la commande au shell.
 
 ## Installation
 
@@ -98,6 +125,12 @@ minimale et la faire grossir depuis l'usage réel, pas par anticipation.
 `.claude/settings.json` d'un projet bat un `allow` global. C'est ce qui permet
 d'être permissif ici : la générosité en global est rattrapable, la sévérité ne
 l'est pas.
+
+**`remoteControlAtStartup` ouvre le pont à chaque session.** La session locale
+devient pilotable depuis claude.ai, donc depuis un mobile. C'est commode, et
+c'est une ouverture réelle sur une machine qui traite des données sensibles.
+L'équivalent ponctuel est `claude --rc` au lancement, qui ne laisse rien
+d'ouvert en permanence.
 
 **Verrous optionnels :** `permissions.disableBypassPermissionsMode` et
 `permissions.disableAutoMode`, à `"disable"`, empêchent définitivement l'usage
