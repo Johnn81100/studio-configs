@@ -104,6 +104,13 @@ versionnée et destinée à l'humain.
   `studio-skills` sans être installé est normal. Quand une modification
   concerne les deux endroits, demander lequel viser.
 
+## Visibilité du travail
+
+Quand une tâche a modifié des fichiers, terminer par le récapitulatif sans
+attendre la demande : `git status --short && git diff --stat HEAD`. Montrer le
+diff complet seulement s'il est court ou sur demande. Hors dépôt git, énumérer
+les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
+
 ## Style de réponse
 
 - Expliquer le raisonnement sur les choix structurants, pas sur chaque ligne.
