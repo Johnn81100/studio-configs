@@ -120,5 +120,5 @@
   "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
-  "switchModelsOnFlag": true
+  "switchModelsOnFlag": false
 }
