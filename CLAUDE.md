@@ -133,3 +133,15 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
 - La règle vaut pour ce qui est écrit maintenant. Ne pas réécrire l'existant
   d'un projet pour l'y conformer sans demande explicite : le nettoyage de fond
   est une décision séparée, qui gonfle les diffs et se décide à froid.
+
+## Mise en forme des documents
+
+- Pas de ligne de séparation horizontale : pas de `---`, `***` ni `___` seuls
+  sur une ligne en Markdown, pas de bordure de paragraphe ni de trait décoratif
+  sur toute la largeur dans les .docx et .pptx. Les titres suffisent à
+  structurer.
+- Ne sont pas concernés : les `---` qui encadrent un front matter YAML, la
+  ligne de séparation d'un tableau Markdown (`|---|`), le contenu d'un bloc de
+  code.
+- La règle vaut pour ce qui est écrit maintenant. Ne pas retirer les
+  séparateurs d'un document existant sans demande explicite.
