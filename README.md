@@ -95,9 +95,12 @@ désarmer le hook.
 impossible dans un fichier déjà riche en tirets cadratins, et obligerait à
 nettoyer l'existant pour avancer.
 
-Dans le JSON, le caractère recherché est écrit sous sa forme échappée Unicode
-plutôt qu'en clair : le fichier reste ainsi conforme à la règle qu'il applique.
-Le parseur JSON la décode avant de passer la commande au shell.
+Dans le JSON, le caractère recherché est écrit en clair. La forme échappée
+(`—`) fonctionnerait de la même façon, mais elle ne tient pas :
+l'application réécrit `settings.json` quand on change un réglage depuis son
+interface, et décode l'échappement au passage (constaté en septembre 2026). Le
+fichier contient donc le caractère qu'il interdit, sans conséquence : le hook
+contrôle les écritures de l'outil `Write`, pas celles de l'application.
 
 ## Installation
 
