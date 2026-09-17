@@ -104,6 +104,56 @@
             "statusMessage": "Verification tiret cadratin"
           }
         ]
+      },
+      {
+        "matcher": "^(?!(Read|Grep|Glob|WebFetch|WebSearch|ToolSearch|AskUserQuestion|Agent|Workflow)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; find \"$g\" -mindepth 1 -maxdepth 1 -type d -mmin +10 -exec rm -rf {} + 2>/dev/null; mkdir -p \"$g/$id\" || exit 0; for f in settings.json CLAUDE.md; do cp \"$HOME/.claude/$f\" \"$g/$id/$f\" 2>/dev/null; done; exit 0",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(?!(Read|Grep|Glob|WebFetch|WebSearch|ToolSearch|AskUserQuestion|Agent|Workflow)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; cat \"$d/$f\" > \"$HOME/.claude/$f\" && m=\"$m $f\"; done; rm -rf \"$d\"; [ -n \"$m\" ] || exit 0; jq -n --arg m \"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree. Verifier git status dans studio-configs.\" '{decision:\"deny\",reason:$m,systemMessage:$m}'",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "^(?!(Read|Grep|Glob|WebFetch|WebSearch|ToolSearch|AskUserQuestion|Agent|Workflow)$)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; cat \"$d/$f\" > \"$HOME/.claude/$f\" && m=\"$m $f\"; done; rm -rf \"$d\"; [ -n \"$m\" ] || exit 0; jq -n --arg m \"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree. Verifier git status dans studio-configs.\" '{decision:\"deny\",reason:$m,systemMessage:$m}'",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "matcher": "user_settings",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat >/dev/null; g=${TMPDIR:-/tmp}/claude-garde-config; [ -n \"$(find \"$g\" -mindepth 1 -maxdepth 1 -type d -mmin -10 2>/dev/null | head -n 1)\" ] && printf '%s' '{\"decision\":\"block\"}'; exit 0",
+            "shell": "bash",
+            "timeout": 10
+          }
+        ]
       }
     ]
   },
