@@ -95,8 +95,9 @@ désarmer le hook.
 impossible dans un fichier déjà riche en tirets cadratins, et obligerait à
 nettoyer l'existant pour avancer.
 
-Dans le JSON, le caractère recherché est écrit en clair. La forme échappée
-(`—`) fonctionnerait de la même façon, mais elle ne tient pas :
+Dans le JSON, le caractère recherché est écrit en clair. La séquence
+d'échappement Unicode de U+2014 fonctionnerait de la même façon, mais elle ne
+tient pas :
 l'application réécrit `settings.json` quand on change un réglage depuis son
 interface, et décode l'échappement au passage (constaté en septembre 2026). Le
 fichier contient donc le caractère qu'il interdit, sans conséquence : le hook
