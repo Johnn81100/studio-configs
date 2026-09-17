@@ -74,10 +74,14 @@ l'exécution arbitraire — dont `Bash(npm run *)` — et les restaure à la sor
 
 ## Les hooks
 
-`settings.json` porte deux hooks `PreToolUse`. Ils appliquent au même titre
-qu'une règle de permission : ils s'exécutent avant l'outil et peuvent l'annuler.
-Leur différence est qu'ils voient le **contenu** de l'appel, pas seulement le nom
-de l'outil et le chemin.
+`settings.json` porte deux familles de hooks. Ils appliquent au même titre
+qu'une règle de permission : ils s'exécutent en dehors du modèle. Leur différence
+est qu'ils voient le **contenu** de l'appel ou l'état des fichiers, pas seulement
+le nom de l'outil et le chemin.
+
+### Refuser avant l'appel
+
+Deux hooks `PreToolUse` s'exécutent avant l'outil et peuvent l'annuler.
 
 | Matcher | Ce qu'il refuse | Pourquoi |
 |---|---|---|
@@ -102,6 +106,55 @@ l'application réécrit `settings.json` quand on change un réglage depuis son
 interface, et décode l'échappement au passage (constaté en septembre 2026). Le
 fichier contient donc le caractère qu'il interdit, sans conséquence : le hook
 contrôle les écritures de l'outil `Write`, pas celles de l'application.
+
+### La garde de la config
+
+Les règles `deny` et le hook `Bash` visent des façons d'écrire. Ils ne voient pas
+une modification qui arrive par un autre chemin : modifier la copie de
+`settings.json` dans un worktree, commiter, fusionner dans `master`. C'est git
+qui réécrit le fichier, et le lien symbolique le rend actif aussitôt (constaté
+en septembre 2026). Un script, l'outil PowerShell ou un `cd` avant la commande
+passent de la même façon.
+
+La garde surveille le résultat plutôt que le chemin. Elle protège
+`settings.json` et `CLAUDE.md`, rien d'autre.
+
+| Événement | Ce qu'il fait |
+|---|---|
+| `PreToolUse` | Copie les deux fichiers dans `$TMPDIR/claude-garde-config/<tool_use_id>/` |
+| `PostToolUse`, `PostToolUseFailure` | Compare, remet l'original si un fichier a changé, le signale dans la section System |
+| `ConfigChange` (`user_settings`) | Pendant un appel d'outil en cours, empêche la session d'appliquer un `settings.json` modifié |
+
+Le hook `ConfigChange` protège la garde elle-même. Le file watcher recharge les
+hooks en cours de session : sans lui, une commande qui retire la garde du
+fichier la désactiverait avant qu'elle agisse.
+
+Les hooks d'appel ignorent `Read`, `Grep`, `Glob`, `WebFetch`, `WebSearch`,
+`ToolSearch` et `AskUserQuestion`, qui n'écrivent rien, ainsi qu'`Agent` et
+`Workflow`, qui durent le temps d'un sous-agent dont chaque appel passe déjà
+par la garde.
+
+Conséquence voulue : une modification de config faite par Claude est annulée,
+quel que soit le chemin. Elle passe par un brouillon, promu à la main.
+
+Limites acceptées, le périmètre est choisi :
+
+- **Un appel refusé laisse sa copie dix minutes.** Un refus de permission ne
+  déclenche pas `PostToolUse`. Pendant ce délai, un réglage changé depuis
+  l'interface ne s'applique pas à la session en cours, sans message ; il
+  s'applique à la suivante.
+- **Un réglage changé depuis l'interface pendant qu'une commande tourne est
+  annulé.**
+- **Les commandes en arrière-plan** continuent après le contrôle.
+- **Des appels simultanés**, dans un ordre précis, peuvent laisser passer une
+  modification.
+- **Les copies sont dans un dossier inscriptible** : une injection qui connaît
+  le mécanisme peut les modifier.
+- **`settings.local.json` et les settings de projet ne sont pas gardés.**
+- **Chaque appel d'outil lance deux `bash` de plus.**
+
+Testé sur des fichiers ordinaires avant installation. La restauration à travers
+le lien symbolique reste à confirmer par un essai réel.
 
 ## Installation
 
