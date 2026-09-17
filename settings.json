@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "c=$(cat); printf '%s' \"$c\" | jq -r '.tool_input.content // .tool_input.new_string // \"\"' | grep -q '\u2014' && printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Tiret cadratin interdit. Remplacer selon le role reel dans la phrase : deux-points s il introduit, virgule s il oppose, parentheses s il incise, point si la phrase peut se couper. Ne pas substituer mecaniquement.\"}}'; exit 0",
+            "command": "c=$(cat); printf '%s' \"$c\" | jq -r '.tool_input.content // .tool_input.new_string // \"\"' | grep -q '—' && printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Tiret cadratin interdit. Remplacer selon le role reel dans la phrase : deux-points s il introduit, virgule s il oppose, parentheses s il incise, point si la phrase peut se couper. Ne pas substituer mecaniquement.\"}}'; exit 0",
             "shell": "bash",
             "timeout": 10,
             "statusMessage": "Verification tiret cadratin"
@@ -117,7 +117,8 @@
     "playwright@claude-plugins-official": true
   },
   "tui": "fullscreen",
+  "remoteControlAtStartup": true,
   "agentPushNotifEnabled": true,
   "voiceEnabled": true,
-  "remoteControlAtStartup": true
+  "switchModelsOnFlag": true
 }
