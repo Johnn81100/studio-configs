@@ -145,3 +145,24 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
   code.
 - La règle vaut pour ce qui est écrit maintenant. Ne pas retirer les
   séparateurs d'un document existant sans demande explicite.
+
+## Sous-agents
+
+- Déléguer les lectures de plusieurs fichiers, audits, recherches, tests et
+  implémentations délimitées, en arrière-plan si le travail peut avancer en
+  parallèle. Garder en direct les modifications courtes d'un seul fichier et
+  ce qui dépend du contexte de la conversation.
+- Pas de plafond : un agent par tâche indépendante, jamais deux qui écrivent
+  dans les mêmes fichiers ou le même worktree. Consigne autosuffisante :
+  chemins exacts, ce qu'il ne doit ni lire ni modifier, format de réponse.
+- Toujours passer `model` et l'annoncer en une ligne avec la raison :
+  `sonnet` par défaut, `opus` pour architecture, sécurité ou débogage subtil,
+  `haiku` seulement pour une tâche mécanique répétée en nombre et vérifiable
+  automatiquement. En cas de doute, le modèle au-dessus.
+- Push, merge, suppression et envoi restent à l'agent principal. Un sous-agent
+  peut commiter dans son propre worktree, sur sa branche, sans push, merge,
+  rebase, reset ni script qui pousse de lui-même. Avant fusion, relire le diff
+  et relancer les tests ; après, supprimer le worktree.
+- Un résultat de sous-agent se vérifie avant usage : tests exécutés et échouant
+  pour la raison annoncée, audit confronté au code, recherche avec sources.
+  S'il est insuffisant, relancer avec le modèle au-dessus.
