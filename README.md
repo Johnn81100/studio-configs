@@ -11,6 +11,7 @@ modification ici est active immédiatement.
 | `settings.json` | `~/.claude/settings.json` | Règles de permission, appliquées par le harness |
 | `CLAUDE.md` | `~/.claude/CLAUDE.md` | Instructions globales, chargées dans chaque session |
 | `docs/security/owasp.md` | — | Ce qui est couvert, ce qui ne l'est pas |
+| `promouvoir.sh` | | Promotion d'un brouillon vers le fichier actif |
 
 `settings.local.json` reste hors du dépôt (gitignoré) : il est propre à la
 machine et accumule les autorisations ponctuelles.
@@ -46,7 +47,31 @@ git commit        # le geste délibéré
 Si cette habitude se perd, il ne reste rien entre une modification et son effet.
 Les règles `deny` sur `settings.json` et `CLAUDE.md` empêchent que je les écrive
 directement : le travail passe par un brouillon (`settings.draft.json`,
-`CLAUDE.draft.md`), la promotion est manuelle.
+`CLAUDE.draft.md`), que je promeus moi-même dans mon terminal.
+
+### Promouvoir un brouillon
+
+Copier le brouillon à la main a un angle mort : un brouillon partiel remplace le
+fichier entier. C'est arrivé en septembre 2026, le `CLAUDE.md` global est resté
+un moment sans ses règles. La promotion passe donc par un script :
+
+```bash
+./promouvoir.sh CLAUDE.draft.md
+./promouvoir.sh settings.draft.json --supprime 3
+```
+
+Il affiche le diff avec le fichier actif, demande confirmation, puis écrit dans
+la cible du lien symbolique. Il refuse :
+
+- un brouillon qui retire des lignes, sauf si `--supprime` en donne exactement
+  le nombre. Une ligne modifiée compte comme une suppression : le compte
+  s'annonce après lecture du diff, et un brouillon tronqué ne passe pas par
+  inadvertance ;
+- un `settings.draft.json` qui n'est pas du JSON valide ;
+- un brouillon vide, ou une cible qui n'est pas un lien symbolique.
+
+Il ne commite pas : relire `git diff` ici, puis commiter. Lancé par Claude, il
+est annulé par la garde, ce qui est voulu.
 
 ## Lire le settings.json
 
@@ -135,7 +160,8 @@ Les hooks d'appel ignorent `Read`, `Grep`, `Glob`, `WebFetch`, `WebSearch`,
 par la garde.
 
 Conséquence voulue : une modification de config faite par Claude est annulée,
-quel que soit le chemin. Elle passe par un brouillon, promu à la main.
+quel que soit le chemin. Elle passe par un brouillon, promu avec
+`promouvoir.sh`.
 
 Limites acceptées, le périmètre est choisi :
 
