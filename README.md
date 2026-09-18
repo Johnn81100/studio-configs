@@ -180,7 +180,8 @@ Limites acceptées, le périmètre est choisi :
 - **Chaque appel d'outil lance deux `bash` de plus.**
 
 Testé sur des fichiers ordinaires avant installation. La restauration à travers
-le lien symbolique reste à confirmer par un essai réel.
+le lien symbolique est confirmée par un cas réel (septembre 2026) : une
+modification de `CLAUDE.md` faite pendant un appel d'outil a été annulée.
 
 ## Installation
 
