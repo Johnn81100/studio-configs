@@ -28,7 +28,12 @@ README, `docs/`, `promouvoir.sh`, ce fichier :
 - une branche `claude/<sujet>` depuis `master`, dans un worktree
   `.claude/worktrees/<sujet>` ;
 - un commit par sujet sur la branche, sans PR ;
-- je fusionne en local. Ensuite, branche et worktree se suppriment.
+- avant de passer la main pour la fusion, Claude rebase la branche sur `master`
+  (dans son worktree, seulement si elle n'a jamais été poussée) et montre
+  `git diff --stat master..<branche>`. En cas de conflit, Claude annule le
+  rebase et me le montre ;
+- je fusionne en local, en avance rapide. Ensuite, branche et worktree se
+  suppriment.
 
 ## Écritures de l'application
 
