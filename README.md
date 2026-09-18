@@ -67,6 +67,10 @@ la cible du lien symbolique. Il refuse :
   le nombre. Une ligne modifiée compte comme une suppression : le compte
   s'annonce après lecture du diff, et un brouillon tronqué ne passe pas par
   inadvertance ;
+- un brouillon dont les fins de ligne (CRLF ou LF) diffèrent de celles du
+  fichier actif. Sinon toutes les lignes apparaîtraient modifiées, sans
+  différence visible dans le diff, et `--supprime` du total les laisserait
+  passer ;
 - un `settings.draft.json` qui n'est pas du JSON valide ;
 - un brouillon vide, ou une cible qui n'est pas un lien symbolique.
 

@@ -8,6 +8,8 @@
 # puis recopie le brouillon. Refuse si le brouillon retire des lignes, sauf si
 # --supprime en donne exactement le nombre : une copie partielle ne passe pas
 # par inadvertance. Une ligne modifiée compte comme une ligne supprimée.
+# Refuse aussi un brouillon dont les fins de ligne (CRLF ou LF) diffèrent de
+# celles du fichier actif.
 #
 # A lancer dans son propre terminal : lancé par Claude, la garde l'annule.
 set -euo pipefail
@@ -46,6 +48,17 @@ fi
 if cmp -s -- "$cible" "$brouillon"; then
   echo "Aucune différence avec $cible."
   exit 0
+fi
+
+# Des fins de ligne converties font compter chaque ligne comme modifiée, et le
+# diff ne montre pas pourquoi : le retour chariot n'est pas visible.
+cr_cible=$(tr -cd '\r' < "$cible" | wc -c)
+cr_brouillon=$(tr -cd '\r' < "$brouillon" | wc -c)
+if (( (cr_cible > 0) != (cr_brouillon > 0) )); then
+  fin() { if [ "$1" -gt 0 ]; then echo CRLF; else echo LF; fi; }
+  echo "Refusé : fins de ligne différentes, $(fin "$cr_cible") dans $cible, $(fin "$cr_brouillon") dans le brouillon." >&2
+  echo "Convertir le brouillon en $(fin "$cr_cible") avant de promouvoir." >&2
+  exit 1
 fi
 
 git -c core.autocrlf=false --no-pager diff --no-index -- "$cible" "$brouillon" || true
