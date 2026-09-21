@@ -10,7 +10,7 @@ modification ici est active immédiatement.
 |---|---|---|
 | `settings.json` | `~/.claude/settings.json` | Règles de permission, appliquées par le harness |
 | `CLAUDE.md` | `~/.claude/CLAUDE.md` | Instructions globales, chargées dans chaque session |
-| `docs/security/owasp.md` | — | Ce qui est couvert, ce qui ne l'est pas |
+| `docs/security/owasp.md` | | Ce qui est couvert, ce qui ne l'est pas |
 | `promouvoir.sh` | | Promotion d'un brouillon vers le fichier actif |
 
 `settings.local.json` reste hors du dépôt (gitignoré) : il est propre à la
@@ -31,7 +31,7 @@ dans `settings.json`. Une consigne de sécurité écrite en prose dans le
 
 Une exception qui compte : en mode auto, le classifier lit le `CLAUDE.md` mais
 ne reçoit pas les résultats d'outils. C'est le seul canal par lequel on informe
-le garde-fou — et la raison pour laquelle ce fichier est sous `deny`.
+le garde-fou, et la raison pour laquelle ce fichier est sous `deny`.
 
 ## Le contrôle repose sur git
 
@@ -98,7 +98,7 @@ Quatre points de mécanique, tous contre-intuitifs.
 **1. L'ordre est `deny` → `ask` → `allow`, premier match gagnant.** La
 spécificité ne compte pas : une règle large l'emporte sur une règle précise
 placée plus bas. Un `deny` ne peut donc pas porter d'exception, et un `ask` non
-plus — impossible d'autoriser `curl localhost` sous un `ask` sur `curl *`.
+plus : impossible d'autoriser `curl localhost` sous un `ask` sur `curl *`.
 
 **2. `deny` bloque sans prompt**, dans tous les modes, y compris
 `bypassPermissions`. Pas de « autoriser cette fois ». Seul l'irrécupérable y va ;
@@ -113,7 +113,7 @@ pattern `/chemin` se résout sur `~/.claude/chemin`. D'où l'usage exclusif de
 `~/` et de `**/` dans les règles de ce dépôt.
 
 Le mode auto retire par ailleurs les règles `allow` larges accordant de
-l'exécution arbitraire — dont `Bash(npm run *)` — et les restaure à la sortie.
+l'exécution arbitraire, dont `Bash(npm run *)`, et les restaure à la sortie.
 
 ## Les hooks
 
@@ -214,7 +214,7 @@ New-Item -ItemType SymbolicLink -Path "$HOME\.claude\CLAUDE.md"     -Target "$HO
 
 Sauvegarder les fichiers existants d'abord : `New-Item` échoue si un fichier du
 même nom occupe la place. Vérifier ensuite que `Get-Item` affiche bien
-`LinkType: SymbolicLink` — c'est le seul moyen de distinguer un lien d'une
+`LinkType: SymbolicLink`. C'est le seul moyen de distinguer un lien d'une
 copie. Puis `/permissions` dans une session liste les règles actives et leur
 provenance.
 
@@ -246,7 +246,7 @@ listes d'autorisation accumulent des entrées ajoutées dans le feu de l'action.
 Syntaxe et comportement des règles : `https://code.claude.com/docs/en/permissions`
 et `https://code.claude.com/docs/en/permission-modes`.
 
-Plusieurs comportements sont récents — extension du `deny` `Read` aux éditions
+Plusieurs comportements sont récents : extension du `deny` `Read` aux éditions
 (v2.1.208) et aux écritures (v2.1.228), ancrage des settings locaux (v2.1.211).
 Vérifier `claude --version` avant de considérer un comportement comme acquis.
 
