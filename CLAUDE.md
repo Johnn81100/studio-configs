@@ -166,6 +166,13 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
   `sonnet` par défaut, `opus` pour architecture, sécurité ou débogage subtil,
   `haiku` seulement pour une tâche mécanique répétée en nombre et vérifiable
   automatiquement. En cas de doute, le modèle au-dessus.
+- Le seuil `opus` porte sur la nature du raisonnement, pas sur l'étiquette du
+  sujet. Un axe d'inventaire (ce qui est stocké, affiché, journalisé, envoyé,
+  quel fichier protège quoi) reste en `sonnet`, même en sécurité, dès lors que
+  la session principale vérifie chaque constat repris et arbitre. Passer en
+  `opus` quand un constat demande de suivre une condition sur plusieurs
+  branches, de relier deux lignes éloignées ou de tenir une machine à états :
+  parcours de paiement, contrôle d'accès, cycle de session.
 - Push, merge, suppression et envoi restent à l'agent principal. Un sous-agent
   peut commiter dans son propre worktree, sur sa branche, sans push, merge,
   rebase, reset ni script qui pousse de lui-même. Avant fusion, relire le diff
