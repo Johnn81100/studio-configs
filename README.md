@@ -55,10 +55,24 @@ Copier le brouillon à la main a un angle mort : un brouillon partiel remplace l
 fichier entier. C'est arrivé en septembre 2026, le `CLAUDE.md` global est resté
 un moment sans ses règles. La promotion passe donc par un script :
 
+Depuis Git Bash, lancé à la racine du dépôt :
+
 ```bash
 ./promouvoir.sh CLAUDE.draft.md
 ./promouvoir.sh settings.draft.json --supprime 3
 ```
+
+Depuis PowerShell, le script étant en Bash, il faut l'appeler par l'exécutable
+de Git Bash. Ne pas écrire `bash` seul : sur ce poste, `bash` est celui de WSL,
+qui voit d'autres chemins.
+
+```powershell
+& "C:\Program Files\Git\bin\bash.exe" -c "cd ~/Studio/studio-configs && ./promouvoir.sh CLAUDE.draft.md"
+```
+
+Le `&&` est ici dans la chaîne, donc lu par Bash. En PowerShell 5.1 il n'est pas
+un séparateur valide : une commande par ligne, et `git -C <chemin>` plutôt qu'un
+`cd` préalable.
 
 Il affiche le diff avec le fichier actif, demande confirmation, puis écrit dans
 la cible du lien symbolique. Il refuse :
