@@ -91,6 +91,15 @@ la cible du lien symbolique. Il refuse :
 Il ne commite pas : relire `git diff` ici, puis commiter. Lancé par Claude, il
 est annulé par la garde, ce qui est voulu.
 
+Lancer la promotion quand aucune autre session Claude n'a de commande en cours :
+la garde de cette session annulerait la promotion (voir ses limites plus bas).
+Pour relire le diff sans rester bloqué dans le lecteur de pages, ajouter
+`--no-pager` ; sinon, `q` pour en sortir.
+
+```powershell
+git -C "$HOME\Studio\studio-configs" --no-pager diff settings.json
+```
+
 ## Lire le settings.json
 
 Quatre points de mécanique, tous contre-intuitifs.
@@ -165,7 +174,7 @@ La garde surveille le résultat plutôt que le chemin. Elle protège
 | Événement | Ce qu'il fait |
 |---|---|
 | `PreToolUse` | Copie les deux fichiers dans `$TMPDIR/claude-garde-config/<tool_use_id>/` |
-| `PostToolUse`, `PostToolUseFailure` | Compare, remet l'original si un fichier a changé, le signale dans la section System |
+| `PostToolUse`, `PostToolUseFailure` | Compare, remet l'original si un fichier a changé, le signale dans la section System. Ne restaure jamais depuis une copie vide, ni depuis un `settings.json` invalide : le signale seulement |
 | `ConfigChange` (`user_settings`) | Pendant un appel d'outil en cours, empêche la session d'appliquer un `settings.json` modifié |
 
 Le hook `ConfigChange` protège la garde elle-même. Le file watcher recharge les
@@ -181,14 +190,42 @@ Conséquence voulue : une modification de config faite par Claude est annulée,
 quel que soit le chemin. Elle passe par un brouillon, promu avec
 `promouvoir.sh`.
 
+#### Copie vide et restauration par renommage
+
+Le 24 septembre 2026, la garde a vidé le `CLAUDE.md` global. Sa copie de
+sauvegarde était vide, et elle l'a restaurée telle quelle. Cause probable : la
+copie a été prise pendant qu'une autre session réécrivait le fichier, à un
+instant où `cat >` l'avait déjà tronqué sans l'avoir encore rempli. Le
+`settings.json` était exposé de la même façon, et vide, il n'aurait plus porté
+aucune règle `deny`.
+
+Deux corrections, dans le hook de restauration :
+
+- **Une copie vide n'est jamais restaurée**, ni une copie de `settings.json`
+  qui n'est pas du JSON valide. Le cas est signalé dans la section System
+  (« copie de sauvegarde vide ou invalide »), et le fichier reste tel quel.
+- **La restauration écrit une copie à côté de la cible, puis la renomme**, au
+  lieu de tronquer puis réécrire le fichier en place. Une autre session ne
+  lit plus jamais un fichier vide ou à moitié écrit. Le renommage vise la
+  cible du lien (`readlink -f`), pas le lien : renommer sur le lien le
+  remplacerait par un fichier ordinaire, sorti de git. Si le renommage
+  échoue (fichier verrouillé par Windows), la garde revient à `cat >` plutôt
+  que de ne rien restaurer.
+
+`promouvoir.sh` écrit encore avec `cat >` : pendant une promotion, le fichier
+est vide un court instant.
+
 Limites acceptées, le périmètre est choisi :
 
 - **Un appel refusé laisse sa copie dix minutes.** Un refus de permission ne
   déclenche pas `PostToolUse`. Pendant ce délai, un réglage changé depuis
   l'interface ne s'applique pas à la session en cours, sans message ; il
   s'applique à la suivante.
-- **Un réglage changé depuis l'interface pendant qu'une commande tourne est
-  annulé.**
+- **Une modification légitime faite pendant qu'une commande tourne est
+  annulée**, quelle que soit la session qui exécute cette commande : réglage
+  changé depuis l'interface, promotion, `git restore`. Le 24 septembre 2026,
+  une promotion de `settings.json` a été annulée par la garde d'une autre
+  session. Promouvoir quand aucune autre session n'a de commande en cours.
 - **Les commandes en arrière-plan** continuent après le contrôle.
 - **Des appels simultanés**, dans un ordre précis, peuvent laisser passer une
   modification.
@@ -200,6 +237,9 @@ Limites acceptées, le périmètre est choisi :
 Testé sur des fichiers ordinaires avant installation. La restauration à travers
 le lien symbolique est confirmée par un cas réel (septembre 2026) : une
 modification de `CLAUDE.md` faite pendant un appel d'outil a été annulée.
+La version du 24 septembre 2026 a été testée sur une fausse config reliée par
+de vrais liens symboliques : restauration à l'octet près, fins de ligne
+conservées, liens intacts, copie vide et JSON invalide non restaurés.
 
 ## Installation
 
