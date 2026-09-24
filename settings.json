@@ -124,7 +124,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; cat \"$d/$f\" > \"$HOME/.claude/$f\" && m=\"$m $f\"; done; rm -rf \"$d\"; [ -n \"$m\" ] || exit 0; jq -n --arg m \"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree. Verifier git status dans studio-configs.\" '{decision:\"block\",reason:$m,systemMessage:$m}'",
+            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; s=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; if [ ! -s \"$d/$f\" ] || { [ $f = settings.json ] && ! jq empty \"$d/$f\" 2>/dev/null; }; then s=\"$s $f\"; continue; fi; t=$(readlink -f \"$HOME/.claude/$f\") || continue; cp \"$d/$f\" \"$t.garde-$id\" && mv -f \"$t.garde-$id\" \"$t\" || cat \"$d/$f\" > \"$t\" && m=\"$m $f\"; rm -f \"$t.garde-$id\"; done; rm -rf \"$d\"; [ -n \"$m$s\" ] || exit 0; r=; [ -z \"$m\" ] || r=\"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree.\"; [ -z \"$s\" ] || r=\"${r:+$r }Garde de la config : copie de sauvegarde vide ou invalide pour$s, rien restaure.\"; jq -n --arg m \"$r Verifier git status dans studio-configs.\" '{decision:\"block\",reason:$m,systemMessage:$m}'",
             "shell": "bash",
             "timeout": 10
           }
@@ -137,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; cat \"$d/$f\" > \"$HOME/.claude/$f\" && m=\"$m $f\"; done; rm -rf \"$d\"; [ -n \"$m\" ] || exit 0; jq -n --arg m \"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree. Verifier git status dans studio-configs.\" '{decision:\"block\",reason:$m,systemMessage:$m}'",
+            "command": "g=${TMPDIR:-/tmp}/claude-garde-config; id=$(jq -r '.tool_use_id // empty'); case $id in ''|*[!A-Za-z0-9_-]*) exit 0;; esac; d=$g/$id; [ -d \"$d\" ] || exit 0; m=; s=; for f in settings.json CLAUDE.md; do [ -f \"$d/$f\" ] || continue; cmp -s \"$d/$f\" \"$HOME/.claude/$f\" && continue; if [ ! -s \"$d/$f\" ] || { [ $f = settings.json ] && ! jq empty \"$d/$f\" 2>/dev/null; }; then s=\"$s $f\"; continue; fi; t=$(readlink -f \"$HOME/.claude/$f\") || continue; cp \"$d/$f\" \"$t.garde-$id\" && mv -f \"$t.garde-$id\" \"$t\" || cat \"$d/$f\" > \"$t\" && m=\"$m $f\"; rm -f \"$t.garde-$id\"; done; rm -rf \"$d\"; [ -n \"$m$s\" ] || exit 0; r=; [ -z \"$m\" ] || r=\"Garde de la config : modification de$m pendant cet appel d outil, version precedente restauree.\"; [ -z \"$s\" ] || r=\"${r:+$r }Garde de la config : copie de sauvegarde vide ou invalide pour$s, rien restaure.\"; jq -n --arg m \"$r Verifier git status dans studio-configs.\" '{decision:\"block\",reason:$m,systemMessage:$m}'",
             "shell": "bash",
             "timeout": 10
           }
