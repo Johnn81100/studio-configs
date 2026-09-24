@@ -14,8 +14,16 @@ ce qui est sur `master` s'applique. Ils ne passent donc pas par une branche.
    mêmes fins de ligne, et pas un extrait.
 2. Claude vérifie le nombre de lignes supprimées avec
    `git -c core.autocrlf=false diff --no-index --numstat` et l'annonce.
-3. Je promeus avec `./promouvoir.sh`, je relis `git diff` et je commite sur
-   `master`.
+3. Je promeus depuis mon terminal, Windows PowerShell 5.1, où `bash` seul
+   désigne WSL. Claude me donne la commande complète, avec le nom du brouillon,
+   et `--supprime N` si l'étape 2 a compté N lignes supprimées :
+
+   ```powershell
+   & "C:\Program Files\Git\bin\bash.exe" -c "cd ~/Studio/studio-configs && ./promouvoir.sh CLAUDE.draft.md"
+   ```
+
+   Je relis `git diff` et je commite sur `master`. Les commandes git que Claude
+   me donne passent par `git -C <chemin>` : pas de `&&` en PowerShell 5.1.
 4. Le brouillon se supprime une fois la promotion commitée.
 
 Claude ne promeut pas lui-même et ne fusionne pas une branche qui toucherait ces
