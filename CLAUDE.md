@@ -191,3 +191,11 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
 - Un résultat de sous-agent se vérifie avant usage : tests exécutés et échouant
   pour la raison annoncée, audit confronté au code, recherche avec sources.
   S'il est insuffisant, relancer avec le modèle au-dessus.
+- L'orchestration et la synthèse restent dans la session principale : elle
+  lance les agents, compile leurs résultats et vérifie chaque constat repris.
+  Pas de sous-agent qui orchestre d'autres sous-agents.
+- Exception : quand les résultats saturent le contexte de la session
+  principale, un sous-orchestrateur `opus` est admis. Il rend sa synthèse avec
+  la liste de ce qu'il n'a pas vérifié.
+- Une orchestration lourde se lance depuis une session `opus`. Si la session
+  est sur un autre modèle, le signaler avant de lancer.
