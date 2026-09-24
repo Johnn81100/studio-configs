@@ -139,7 +139,7 @@ Deux hooks `PreToolUse` s'exécutent avant l'outil et peuvent l'annuler.
 | Matcher | Ce qu'il refuse | Pourquoi |
 |---|---|---|
 | `Bash` | Écrire dans une config protégée par un détour shell | Les règles `deny` ne couvrent qu'`Edit`. Sans ce hook, un `cat > settings.json` passerait sous la barrière. |
-| `Write` | Un contenu portant un tiret cadratin | La règle de ponctuation du `CLAUDE.md` n'est qu'un panneau. Ce hook la rend appliquée. |
+| `Write` | Un contenu portant un tiret cadratin, en clair ou par un détour | La règle de ponctuation du `CLAUDE.md` n'est qu'un panneau. Ce hook la rend appliquée. |
 
 Deux limites connues, constatées à l'usage :
 
@@ -151,6 +151,41 @@ désarmer le hook.
 **Il ne couvre pas `Edit`.** Étendre le matcher rendrait toute retouche
 impossible dans un fichier déjà riche en tirets cadratins, et obligerait à
 nettoyer l'existant pour avancer.
+
+#### Les détours et l'exception du scratchpad
+
+Le 24 septembre 2026, un script de nettoyage devait nommer le caractère pour le
+retirer. Refusé en clair, il l'a construit par son code (`chr(0x2014)`) et le
+hook ne l'a pas vu. Le résultat était conforme, mais le même détour aurait
+laissé passer un tiret dans n'importe quel livrable.
+
+Le hook refuse donc aussi les formes détournées : séquences d'échappement
+(`\u2014`, `\u{2014}`, `\x{2014}`, `\N{EM DASH}`), code du caractère
+(`0x2014`, `chr(8212)`, `[char]8212`, `fromCharCode(8212)`) et entités HTML
+(`&mdash;`, `&#8212;`, `&#x2014;`). `U+2014` écrit en toutes lettres reste
+permis : c'est ainsi qu'une doc parle du caractère.
+
+**Exception : le scratchpad de session.** Un fichier écrit sous
+`Temp/claude/.../scratchpad/` peut contenir ces formes, pas le caractère en
+clair. C'est là que vivent les scripts de nettoyage, hors de tout dépôt. Un
+marqueur à placer dans le fichier a été écarté : n'importe quel contenu
+pourrait s'accorder l'exception, alors que l'emplacement empêche un détour
+d'atteindre un livrable.
+
+Limites acceptées :
+
+- **La liste n'est pas exhaustive.** Des octets bruts (`\xe2\x80\x94`), du
+  base64 ou une concaténation passent encore. Le hook arrête l'oubli et le
+  réflexe, pas une intention décidée à le contourner.
+- **Une doc qui cite ces formes est refusée à l'écriture par `Write`**, comme
+  cette section. Elle se modifie par `Edit`, que le hook ne couvre pas.
+- **`0x2014` peut apparaître par hasard** dans du code sans rapport. Le cas
+  est improbable ; s'il se présente, il se traite au moment où il se pose.
+
+Testé avant promotion : texte ordinaire et `U+2014` acceptés, caractère en
+clair refusé partout, scratchpad compris, chaque détour refusé dans un dépôt,
+les onze formes acceptées dans le scratchpad avec un chemin Windows comme avec
+un chemin Unix, `new_string` contrôlé comme `content`.
 
 Dans le JSON, le caractère recherché est écrit en clair. La séquence
 d'échappement Unicode de U+2014 fonctionnerait de la même façon, mais elle ne
