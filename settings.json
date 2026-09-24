@@ -14,6 +14,7 @@
       "mcp__plugin_github_github__create_repository",
       "mcp__plugin_github_github__list_commits",
       "WebFetch",
+      "WebSearch",
       "Bash(docker ps*)",
       "Bash(docker images*)",
       "Bash(docker image ls*)",
