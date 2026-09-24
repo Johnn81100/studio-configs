@@ -79,5 +79,14 @@ case $reponse in
   *) echo "Abandon, rien n'a été écrit."; exit 1 ;;
 esac
 
-cat -- "$brouillon" > "$cible"
-echo "Promu. Relire puis commiter : git -C \"$(dirname -- "$cible")\" diff"
+# Écrire à côté puis renommer : une autre session ne lit jamais le fichier vide
+# ou à moitié écrit, ce que `cat >` exposait. Le renommage vise la cible, pas
+# le lien, qui serait sinon remplacé par un fichier ordinaire.
+tmp=$cible.promotion-$$
+trap 'rm -f -- "$tmp"' EXIT
+cp -- "$brouillon" "$tmp"
+if ! mv -f -- "$tmp" "$cible"; then
+  echo "Renommage impossible (fichier verrouillé ?) : écriture en place." >&2
+  cat -- "$brouillon" > "$cible"
+fi
+echo "Promu. Relire puis commiter : git -C \"$(dirname -- "$cible")\" --no-pager diff"
