@@ -75,7 +75,8 @@ un séparateur valide : une commande par ligne, et `git -C <chemin>` plutôt qu'
 `cd` préalable.
 
 Il affiche le diff avec le fichier actif, demande confirmation, puis écrit dans
-la cible du lien symbolique. Il refuse :
+la cible du lien symbolique : une copie à côté, renommée par-dessus, pour
+qu'aucune session ne lise un fichier incomplet. Il refuse :
 
 - un brouillon qui retire des lignes, sauf si `--supprime` en donne exactement
   le nombre. Une ligne modifiée compte comme une suppression : le compte
@@ -212,8 +213,8 @@ Deux corrections, dans le hook de restauration :
   échoue (fichier verrouillé par Windows), la garde revient à `cat >` plutôt
   que de ne rien restaurer.
 
-`promouvoir.sh` écrit encore avec `cat >` : pendant une promotion, le fichier
-est vide un court instant.
+`promouvoir.sh` écrit de la même façon, par renommage : pendant une promotion,
+le fichier n'est jamais vide ni à moitié écrit.
 
 Limites acceptées, le périmètre est choisi :
 
