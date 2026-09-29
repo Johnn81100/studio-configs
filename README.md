@@ -294,6 +294,34 @@ même nom occupe la place. Vérifier ensuite que `Get-Item` affiche bien
 copie. Puis `/permissions` dans une session liste les règles actives et leur
 provenance.
 
+## Modèle et mode de départ
+
+`"model": "opusplan"` fait tourner Opus en mode plan et Sonnet hors du mode
+plan. La bascule suit le mode, dans les deux sens, sans action manuelle : entrer
+en mode plan rend la main à Opus, valider le plan la passe à Sonnet. Le contexte
+de la conversation est conservé, le cache repart de zéro à chaque bascule. Les
+alias `opus` et `sonnet` suivent la dernière version de chaque modèle.
+
+`"defaultMode": "plan"` ouvre chaque session en mode plan, en lecture seule :
+Opus lit et propose avant que Sonnet modifie quoi que ce soit. Il remplace
+`acceptEdits`, qui reste accessible en validant le plan avec acceptation
+automatique des modifications. Pour une retouche mineure, Shift+Tab sort du
+mode plan.
+
+Côté sous-agents, le `CLAUDE.md` impose de passer `model` à chaque appel, et ce
+paramètre prime sur le frontmatter de l'agent. Sans lui, un agent sans champ
+`model:` (Alexis, par exemple) hériterait du modèle de la session, et la doc ne
+dit pas comment cet héritage se résout avec `opusplan`. Un agent qui doit
+rester sur un modèle quel que soit l'appel le déclare dans son frontmatter.
+
+L'orchestration suit la même coupure : le plan (agents, modèles, consignes) se
+fait en mode plan, l'exécution sur Sonnet, et la synthèse repasse en mode plan
+quand elle demande d'arbitrer.
+
+Choix fait en septembre 2026, après un test à l'aveugle sur un brief
+d'architecture : Opus 42/50, Sonnet 40/50, Haiku 13/50. L'écart justifie Opus
+pour la conception, pas pour l'exécution.
+
 ## À adapter
 
 **La liste `allow` est une hypothèse.** Elle suppose une stack npm. La laisser
