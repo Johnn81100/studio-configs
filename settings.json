@@ -75,9 +75,9 @@
       "Bash(docker system prune*)",
       "Bash(docker network rm *)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "plan"
   },
-  "model": "opus",
+  "model": "opusplan",
   "enableAllProjectMcpServers": false,
   "enabledMcpjsonServers": [],
   "hooks": {

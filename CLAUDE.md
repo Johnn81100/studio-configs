@@ -179,6 +179,10 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
   `opus` quand un constat demande de suivre une condition sur plusieurs
   branches, de relier deux lignes éloignées ou de tenir une machine à états :
   parcours de paiement, contrôle d'accès, cycle de session.
+- Design : `opus` pour cadrer un brief, challenger un parcours, auditer une
+  maquette existante (`REVIEW`) ou poser les bases d'un design system, `sonnet`
+  pour produire ou décliner des maquettes. Le `model` passé à l'appel prime sur
+  celui de l'agent.
 - Quand plusieurs agents tournent en parallèle, relever à la fin le modèle, les
   tokens, les appels d'outils et la durée de chacun, que le harnais fournit, et
   les donner en une ligne. Sans mesure, le choix des modèles reste une
@@ -197,5 +201,8 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
 - Exception : quand les résultats saturent le contexte de la session
   principale, un sous-orchestrateur `opus` est admis. Il rend sa synthèse avec
   la liste de ce qu'il n'a pas vérifié.
-- Une orchestration lourde se lance depuis une session `opus`. Si la session
-  est sur un autre modèle, le signaler avant de lancer.
+- Une orchestration lourde se prépare en mode plan, donc sur Opus avec
+  `opusplan` : le plan fixe les agents, leur modèle et leur consigne.
+  L'exécution tourne ensuite sur Sonnet. La synthèse et la vérification des
+  constats repassent en mode plan dès qu'elles demandent d'arbitrer. Si la
+  session n'est ni en `opusplan` ni en `opus`, le signaler avant de lancer.
