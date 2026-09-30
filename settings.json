@@ -1,7 +1,4 @@
 {
-  "env": {
-    "NODE_EXTRA_CA_CERTS": "C:/Users/<utilisateur>/.claude/windows-certs.pem"
-  },
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
