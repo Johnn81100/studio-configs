@@ -116,6 +116,10 @@ versionnée et destinée à l'humain.
   synchroniser skills, agents, glossaires ou scripts. Un skill présent dans
   `studio-skills` sans être installé est normal. Quand une modification
   concerne les deux endroits, demander lequel viser.
+- `studio-configs`, `studio-skills` et `studio-agents` sont publics sur GitHub.
+  Avant un commit dans l'un d'eux, vérifier qu'il n'entre ni chemin absolu,
+  ni nom de client, ni donnée de facturation, ni surnom : préférer `~` et
+  les variables d'environnement.
 
 ## Visibilité du travail
 
