@@ -69,6 +69,10 @@ un sens comme dans l'autre.
 - Un commit à la fois, avec un périmètre lisible en diff. Pas de commit
   fourre-tout.
 - Ne pas pousser, ne pas merger, ne pas créer de PR sans demande explicite.
+- Après un push demandé, attendre la fin du run CI (`gh run list --limit 1`,
+  puis `gh run view <id>`) et rapporter l'état réel de chaque job. Un vert
+  local ne prouve rien pour la matrice CI (systèmes, tests sautés). En cas
+  d'échec, reproduire en local avant de pousser un correctif.
 
 ## Branches
 
@@ -94,19 +98,19 @@ Chaque règle ne s'applique que si le fichier concerné existe dans le projet.
 - Si `docs/architecture.md` existe → tout ajout de couche, de module, de
   dépendance externe ou d'infrastructure amène à vérifier si une réponse déjà
   écrite est devenue fausse
-
-Ne pas créer ces fichiers s'ils sont absents : leur absence est un choix.
-
 - Si `design/contexte.md` existe → toute maquette qui introduit une couleur,
   un spacing ou un composant absent du design system met à jour ce fichier
   avant de terminer
 
+Ne pas créer ces fichiers s'ils sont absents : leur absence est un choix.
+
 ## Environnement de travail
 
 `~/Studio` est l'environnement de travail : `studio-projects/` contient les
-projets, `studio-skills/`, `studio-agents/`, `studio-glossaires/`,
-`studio-scripts/` et `studio-configs/` en sont la bibliothèque de référence,
-versionnée et destinée à l'humain.
+projets, et les autres dépôts `studio-*` de la racine en sont la bibliothèque de
+référence, versionnée et destinée à l'humain. Leur liste se lit sur le disque,
+elle n'est pas recopiée ici : un nouveau dépôt `studio-*` n'a pas à être
+déclaré pour en faire partie.
 
 - `studio-configs/settings.json` et `studio-configs/CLAUDE.md` sont liés par
   symlink dans `~/.claude/`. Ces deux fichiers font foi depuis `~/Studio` : une
@@ -120,21 +124,43 @@ versionnée et destinée à l'humain.
   Avant un commit dans l'un d'eux, vérifier qu'il n'entre ni chemin absolu,
   ni nom de client, ni donnée de facturation, ni surnom : préférer `~` et
   les variables d'environnement.
+- Le terminal est Windows PowerShell 5.1 : toute commande donnée à
+  l'utilisateur s'écrit pour ce shell. Chemins Windows, `git -C "<chemin>"`
+  plutôt qu'un `cd`, une commande par bloc. `&&` n'existe pas dans ce shell :
+  enchaîner avec `;` quand les commandes sont indépendantes, avec
+  `A ; if ($?) { B }` quand la seconde ne doit tourner qu'en cas de succès. Un
+  script Bash s'appelle par Git Bash avec l'opérateur d'appel
+  (`& "$env:ProgramFiles\Git\bin\bash.exe" ./script.sh`) : `bash` seul pointe
+  vers WSL, et `.\script.sh` ouvre le fichier dans l'application associée
+  au lieu de l'exécuter.
+- Un script PowerShell écrit pour l'utilisateur s'arrête à la première erreur :
+  `$ErrorActionPreference = 'Stop'`, conditions parenthésées, et vérification du
+  code de retour après un appel natif.
+- Les dates renvoyées par l'outil Gmail sont en UTC. Les convertir en heure de
+  Paris avant d'écrire « hier », « ce matin » ou une heure précise.
 
 ## Visibilité du travail
 
 Quand une tâche a modifié des fichiers, terminer par le récapitulatif sans
-attendre la demande : `git status --short && git diff --stat HEAD`. Montrer le
+attendre la demande : `git status --short ; git diff --stat HEAD`. Montrer le
 diff complet seulement s'il est court ou sur demande. Hors dépôt git, énumérer
 les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
 
 ## Style de réponse
 
-- Expliquer le raisonnement sur les choix structurants, pas sur chaque ligne.
+- Expliquer le raisonnement sur les choix coûteux à défaire : dépendance
+  ajoutée, schéma de données, découpage en modules, format d'échange,
+  convention qui s'applique à tout le dépôt. Sur le reste, écrire le code sans
+  le commenter.
 - Pas de code placeholder ni de TODO en guise de contenu : si une info manque,
   la demander.
 - Signaler quand une approche demandée pose un problème plutôt que de
   l'implémenter en silence.
+- Proposer d'abord la variante minimale qui corrige le problème dans les
+  fichiers existants, et dire en une phrase ce qu'elle ne couvre pas. Tout
+  fichier, script ou étape manuelle créé en plus se justifie explicitement, en
+  une phrase chacun. L'extension se mentionne, elle ne se construit pas
+  d'office.
 
 ## Ponctuation
 
@@ -167,13 +193,17 @@ les fichiers touchés. Ne pas le faire quand rien n'a été écrit.
 
 - Déléguer les lectures de plusieurs fichiers, audits, recherches, tests et
   implémentations délimitées, en arrière-plan si le travail peut avancer en
-  parallèle. Garder en direct les modifications courtes d'un seul fichier et
-  ce qui dépend du contexte de la conversation.
+  parallèle. Une tâche est délimitée quand sa consigne tient sans la
+  conversation : fichiers à toucher nommés et critère de fin vérifiable (un
+  test qui passe, une commande qui sort 0). Si l'un des deux manque, la garder
+  en direct, comme les modifications courtes d'un seul fichier et ce qui
+  dépend du contexte de la conversation.
 - Pas de plafond : un agent par tâche indépendante, jamais deux qui écrivent
   dans les mêmes fichiers ou le même worktree. Consigne autosuffisante :
   chemins exacts, ce qu'il ne doit ni lire ni modifier, format de réponse.
 - Toujours passer `model` et l'annoncer en une ligne avec la raison :
-  `sonnet` par défaut, `opus` pour architecture, sécurité ou débogage subtil,
+  `sonnet` par défaut, `opus` pour l'architecture, la sécurité ou un débogage
+  dont la cause traverse plusieurs fichiers ou dépend d'un état,
   `haiku` seulement pour une tâche mécanique répétée en nombre et vérifiable
   automatiquement. En cas de doute, le modèle au-dessus.
 - Le seuil `opus` porte sur la nature du raisonnement, pas sur l'étiquette du
