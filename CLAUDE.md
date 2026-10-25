@@ -77,6 +77,11 @@ un sens comme dans l'autre.
 ## Branches
 
 - Ne jamais développer sur la branche d'intégration du dépôt.
+- Exception : `studio-agents`, `studio-skills`, `studio-glossaires`,
+  `studio-scripts` et `studio-facturation` se commitent directement sur leur
+  branche principale. Un seul auteur, ni CI ni PR : une branche n'y protège
+  rien. Un commit par sujet reste la règle, et le push reste à ma main.
+  `studio-configs` et `studio-admin` gardent leur protocole de branches.
 - Si `git worktree list` montre déjà plusieurs worktrees, le projet travaille
   ainsi : créer un worktree pour la nouvelle branche plutôt que de changer de
   branche dans le dépôt principal : plusieurs sessions coexistent.
